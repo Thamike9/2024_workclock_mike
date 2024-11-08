@@ -20,6 +20,7 @@
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <EEPROM.h>
+#include <TimeLib.h>
 
 LedArray ledArr(25); // Initialize the LED brighness to 25
 Time RTime(12, 0);   // Initialize the time to 12:00
@@ -117,18 +118,22 @@ void loop()
   {
     timeClient.begin();
     // GMT +1 = 3600
-    timeClient.setTimeOffset(7200);
+    timeClient.setTimeOffset(3600);
     timeClient.update();
+    
+    uint16_t currentYear = year(timeClient.getEpochTime());
+    uint8_t  currentMonth = month(timeClient.getEpochTime());
+    uint8_t  currentDay = day(timeClient.getEpochTime());
     Serial.print("Grabbing NTP update. ");
-    int currentHour = timeClient.getHours();
+    int8_t currentHour = hour(timeClient.getEpochTime());
     Serial.print("Hour: ");
     Serial.println(currentHour);
 
-    int currentMinute = timeClient.getMinutes();
+    int currentMinute = minute(timeClient.getEpochTime());
     Serial.print("Minutes: ");
     Serial.println(currentMinute);
-
-    RTime.setTime(currentHour, currentMinute);
+  
+    RTime.setTime(currentYear, currentMonth, currentDay, currentHour, currentMinute);
 
     next_ntp_update = millis() + 24 * 60 * 60 * 1000; // grab a new update every 24 hours
   }
